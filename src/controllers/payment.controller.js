@@ -106,12 +106,7 @@ async function purchasedCourse(req, res) {
         const coursesNotFound = []
         for (const courseId of courses) {
             const course = await CoursesModel.findById(courseId)
-
-            if (!course || !course.display) {
-                coursesNotFound.push(courseId)
-            } else {
-                user.purchased_courses.push({ course: courseId })
-            }
+            user.purchased_courses.push({ course: courseId })
         }
 
         // if (coursesNotFound.length > 0) {
