@@ -1,27 +1,15 @@
 {
-  "name": "e_pharma_backend",
+  "name": "payment_gateway",
   "version": "1.0.0",
-  "description": "e pharma website backend made with postgresql",
+  "description": "payment_gateway",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "prod": "node server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Hopingminds/E_Pharma_Backend.git"
-  },
-  "keywords": [
-    "ePharma",
-    "website"
-  ],
   "author": "HMCodeLab",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Hopingminds/E_Pharma_Backend/issues"
-  },
-  "homepage": "https://github.com/Hopingminds/E_Pharma_Backend#readme",
   "dependencies": {
     "app-root-path": "^3.1.0",
     "bcryptjs": "^2.4.3",
