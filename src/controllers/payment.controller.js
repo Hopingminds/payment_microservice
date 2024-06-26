@@ -117,10 +117,10 @@ async function purchasedCourse(req, res) {
         await order.save()
         await user.save()
         deleteCart(userID)
-        return res.redirect(`${process.env.APP_SERVICE_URL}/paymentsuccess`)
+        return res.redirect(`${process.env.APP_SERVICE_URL}/success`)
     } catch (error) {
         console.log(error);
-        return res.redirect(`${process.env.APP_SERVICE_URL}/paymentfailed`)
+        return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
     }
 }
 
