@@ -58,7 +58,7 @@ async function makePayment(req, res) {
 }
 
 function convertToCoursesArray(inputArray) {
-    return  inputArray.map(item => item.course.toString())
+    return inputArray.map(item => item.course.toString())
 }
 // body: {
 //     "courses": [
@@ -104,23 +104,13 @@ async function purchasedCourse(req, res) {
         }
 
         const coursesNotFound = []
-        const coursesAlreadyPurchased = []
-
         for (const courseId of courses) {
-            // Check if the course is already purchased
-            const alreadyPurchased = user.purchased_courses.some((course) =>
-                course.course.equals(courseId)
-            )
-            if (alreadyPurchased) {
-                coursesAlreadyPurchased.push(courseId)
-            } else {
-                const course = await CoursesModel.findById(courseId)
+            const course = await CoursesModel.findById(courseId)
 
-                if (!course || !course.display) {
-                    coursesNotFound.push(courseId)
-                } else {
-                    user.purchased_courses.push({ course: courseId })
-                }
+            if (!course || !course.display) {
+                coursesNotFound.push(courseId)
+            } else {
+                user.purchased_courses.push({ course: courseId })
             }
         }
 
