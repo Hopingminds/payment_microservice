@@ -88,7 +88,7 @@ async function purchasedCourse(req, res) {
         const userID = mandatoryFieldsData[5]
         const cartData = await CartModel
             .findOne({ _id: userID })
-        const user = await UserModel.findById(userID)
+        let user = await UserModel.findById(userID)
 
         const orderDetails = {
             "name": user.name,
@@ -103,9 +103,7 @@ async function purchasedCourse(req, res) {
             return res.redirect(`${process.env.APP_SERVICE_URL}/paymentfailed`)
         }
 
-        const coursesNotFound = []
         for (const courseId of courses) {
-            const course = await CoursesModel.findById(courseId)
             user.purchased_courses.push({ course: courseId })
         }
 
