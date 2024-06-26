@@ -54,34 +54,22 @@ const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, cou
 async function makePayment(req, res) {
     const { userID, email, phone, name, address, zip, country, state, gstNumber } = req.query
     const cartValue = await getcartValue(userID)
+    if (cartValue <= 0) {
+        return purchasedCourseFucntion(req, res, userID, email, phone, name, address, zip, country, state, gstNumber)
+    }
     res.redirect(handleGenerateUrl(email, cartValue, phone, userID, name, address, zip, country, state, gstNumber))
 }
 
 function convertToCoursesArray(inputArray) {
     return inputArray.map(item => item.course.toString())
 }
-// body: {
-//     "courses": [
-//         "65eee9fa38d32c2479937d44"
-//         "65eee9fa38d32c2479937d45"
-//         "65eee9fa38d32c2479937d46"
-//     ]
-// 	"orderDetails": {
-// 		"name": "Sahil Kumar",
-// 		"address": "475-B",
-// 		"zip": 1442002,
-// 		"country": "India",
-// 		"state": "Punjab",
-// 		"gstNumber": "1234PKLKUP",
-// 	}
-// }
 
 async function purchasedCourse(req, res) {
     try {
         const data = req.body
 
         if (data['Response Code'] != 'E000') {
-            return res.redirect(`${process.env.APP_SERVICE_URL}/paymentfailed`)
+            return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
         }
 
         const mandatoryFieldsData = convertToJSONArray(data['mandatory fields'])
@@ -100,16 +88,12 @@ async function purchasedCourse(req, res) {
         }
         const courses = convertToCoursesArray(cartData.courses)
         if (!user) {
-            return res.redirect(`${process.env.APP_SERVICE_URL}/paymentfailed`)
+            return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
         }
 
         for (const courseId of courses) {
             user.purchased_courses.push({ course: courseId })
         }
-
-        // if (coursesNotFound.length > 0) {
-        //     return res.redirect(`${process.env.APP_SERVICE_URL}/paymentfailed`)
-        // }
 
         let orderData = { ...orderDetails, purchasedBy: userID }
         const order = new OrdersModel(orderData)
@@ -122,6 +106,38 @@ async function purchasedCourse(req, res) {
         console.log(error);
         return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
     }
+}
+
+
+async function purchasedCourseFucntion(req, res, userID, email, phone, name, address, zip, country, state, gstNumber) {
+    const cartData = await CartModel
+        .findOne({ _id: userID })
+    let user = await UserModel.findById(userID)
+
+    const orderDetails = {
+        name,
+        address,
+        zip,
+        country,
+        state,
+        gstNumber
+    }
+    const courses = convertToCoursesArray(cartData.courses)
+    if (!user) {
+        return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
+    }
+
+    for (const courseId of courses) {
+        user.purchased_courses.push({ course: courseId })
+    }
+
+    let orderData = { ...orderDetails, purchasedBy: userID }
+    const order = new OrdersModel(orderData)
+
+    await order.save()
+    await user.save()
+    deleteCart(userID)
+    return res.redirect(`${process.env.APP_SERVICE_URL}/success`)
 }
 
 module.exports = { makePayment, purchasedCourse }
