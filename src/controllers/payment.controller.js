@@ -58,8 +58,8 @@ async function makePayment(req, res) {
         return purchasedCourseFucntion(req, res, userID, email, phone, name, address, zip, country, state, gstNumber)
     }
 
-    console.log(handleGenerateUrl(email, cartValue, phone, userID, name, address, zip, country, state, gstNumber))
-    // res.redirect(handleGenerateUrl(email, cartValue, phone, userID, name, address, zip, country, state, gstNumber))
+    // console.log(handleGenerateUrl(email, cartValue, phone, userID, name, address, zip, country, state, gstNumber))
+    res.redirect(handleGenerateUrl(email, cartValue, phone, userID, name, address, zip, country, state, gstNumber))
 }
 
 function convertToCoursesArray(inputArray) {
