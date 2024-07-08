@@ -20,7 +20,8 @@ const encryptAES128ECB = (plaintext, key) => {
 };
 
 function convertToJSONArray(dataString) {
-    const values = dataString.split('%7C');
+    let values = dataString.split('%7C');
+    values = dataString.split('|');
     return values;
 }
 
