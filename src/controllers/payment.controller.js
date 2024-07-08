@@ -43,10 +43,10 @@ const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, cou
     const e_return_url = encryptAES128ECB(return_url, key);
     const e_paymode = encryptAES128ECB(paymode, key);
     const e_man_fields = encryptAES128ECB(man_fields, key);
-    const e_opt_fields = encryptAES128ECB(opt_fields, key);
+    // const e_opt_fields = encryptAES128ECB(opt_fields, key);
 
     // Construct the encrypted URL
-    const encryptedUrl = `https://eazypay.icicibank.com/EazyPG?merchantid=${merchant_id}&mandatory fields=${encodeURIComponent(e_man_fields)}&optional fields=${encodeURIComponent(e_opt_fields)}&returnurl=${encodeURIComponent(e_return_url)}&Reference No=${encodeURIComponent(e_ref_no)}&submerchantid=${encodeURIComponent(e_sub_mer_id)}&transaction amount=${encodeURIComponent(e_amt)}&paymode=${encodeURIComponent(e_paymode)}`;
+    const encryptedUrl = `https://eazypay.icicibank.com/EazyPG?merchantid=${merchant_id}&mandatory fields=${encodeURIComponent(e_man_fields)}&optional fields=${encodeURIComponent(opt_fields)}&returnurl=${encodeURIComponent(e_return_url)}&Reference No=${encodeURIComponent(e_ref_no)}&submerchantid=${encodeURIComponent(e_sub_mer_id)}&transaction amount=${encodeURIComponent(e_amt)}&paymode=${encodeURIComponent(e_paymode)}`;
 
     return encryptedUrl.replaceAll(' ', '%20')
 };
@@ -57,7 +57,9 @@ async function makePayment(req, res) {
     if (cartValue <= 0) {
         return purchasedCourseFucntion(req, res, userID, email, phone, name, address, zip, country, state, gstNumber)
     }
-    res.redirect(handleGenerateUrl(email, cartValue, phone, userID, name, address, zip, country, state, gstNumber))
+
+    console.log(handleGenerateUrl(email, cartValue, phone, userID, name, address, zip, country, state, gstNumber))
+    // res.redirect(handleGenerateUrl(email, cartValue, phone, userID, name, address, zip, country, state, gstNumber))
 }
 
 function convertToCoursesArray(inputArray) {
