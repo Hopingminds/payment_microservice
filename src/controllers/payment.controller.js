@@ -27,7 +27,7 @@ function convertToJSONArray(dataString) {
 const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, country, state, gstNumber) => {
     const merchant_id = "383138";
     const key = process.env.AES_KEY;
-    const ref_no = Math.floor(Math.random() * 9990) + 10+Date.now();
+    const ref_no = Math.floor(Math.random() * 9990) + 10 + Date.now();
     const sub_mer_id = "45";
     const amt = amount.toString();
     const return_url = `${process.env.APP_BASE_URL}/api/v1/payment-status`; // Your return URL
