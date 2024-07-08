@@ -1,5 +1,6 @@
 const allowedOrigins = [
   'http://localhost:3000',
+  'https://hopingminds.com'
 ];
 
 const corsOptions = {
