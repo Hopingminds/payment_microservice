@@ -24,23 +24,10 @@ function convertToJSONArray(dataString) {
     return values;
 }
 
-function generateRefNumber() {
-    // Generate a random number between 10 and 9999
-    const randomNumber = Math.floor(Math.random() * 9990) + 10;
-
-    // Get the current timestamp
-    const timestamp = Date.now();
-
-    // Combine the random number and the timestamp to form the reference number
-    const refNumber = `${randomNumber}${timestamp}`;
-
-    return refNumber;
-}
-
 const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, country, state, gstNumber) => {
     const merchant_id = "383138";
     const key = process.env.AES_KEY;
-    const ref_no = generateRefNumber();
+    const ref_no = Math.floor(Math.random() * 9990) + 10+Date.now();
     const sub_mer_id = "45";
     const amt = amount.toString();
     const return_url = `${process.env.APP_BASE_URL}/api/v1/payment-status`; // Your return URL
