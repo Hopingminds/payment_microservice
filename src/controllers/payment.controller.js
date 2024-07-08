@@ -20,7 +20,7 @@ const encryptAES128ECB = (plaintext, key) => {
 };
 
 function convertToJSONArray(dataString) {
-    const values = dataString.split('|');
+    const values = dataString.split('%7C');
     return values;
 }
 
@@ -114,7 +114,10 @@ async function purchasedCourse(req, res) {
         return res.redirect(`${process.env.APP_SERVICE_URL}/success`)
     } catch (error) {
         console.log(error);
-        return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
+        return res.status(500).send({
+            title: error.message || "Internal Server Error",
+            message: "Please Contact hopingminds.com Admin"
+        })
     }
 }
 
