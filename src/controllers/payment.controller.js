@@ -25,10 +25,10 @@ function convertToJSONArray(dataString) {
 }
 
 const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, country, state, gstNumber) => {
-    const merchant_id = "139765";
+    const merchant_id = "383138";
     const key = process.env.AES_KEY;
     const ref_no = Math.floor(Math.random() * 9990) + 10;
-    const sub_mer_id = "23";
+    const sub_mer_id = "45";
     const amt = amount.toString();
     const return_url = `${process.env.APP_BASE_URL}/api/v1/payment-status`; // Your return URL
     const paymode = "9";
@@ -46,7 +46,7 @@ const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, cou
     const e_opt_fields = encryptAES128ECB(opt_fields, key);
 
     // Construct the encrypted URL
-    const encryptedUrl = `https://eazypayuat.icicibank.com/EazyPG?merchantid=${merchant_id}&mandatory fields=${encodeURIComponent(e_man_fields)}&optional fields=${encodeURIComponent(e_opt_fields)}&returnurl=${encodeURIComponent(e_return_url)}&Reference No=${encodeURIComponent(e_ref_no)}&submerchantid=${encodeURIComponent(e_sub_mer_id)}&transaction amount=${encodeURIComponent(e_amt)}&paymode=${encodeURIComponent(e_paymode)}`;
+    const encryptedUrl = `https://eazypay.icicibank.com/EazyPG?merchantid=${merchant_id}&mandatory fields=${encodeURIComponent(e_man_fields)}&optional fields=${encodeURIComponent(e_opt_fields)}&returnurl=${encodeURIComponent(e_return_url)}&Reference No=${encodeURIComponent(e_ref_no)}&submerchantid=${encodeURIComponent(e_sub_mer_id)}&transaction amount=${encodeURIComponent(e_amt)}&paymode=${encodeURIComponent(e_paymode)}`;
 
     return encryptedUrl.replaceAll(' ', '%20')
 };
@@ -67,7 +67,7 @@ function convertToCoursesArray(inputArray) {
 async function purchasedCourse(req, res) {
     try {
         const data = req.body
-
+        console.log(data);
         if (data['Response Code'] != 'E000') {
             return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
         }
