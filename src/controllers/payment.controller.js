@@ -91,6 +91,7 @@ async function purchasedCourse(req, res) {
             "state": mandatoryFieldsData[9],
             "gstNumber": mandatoryFieldsData[10],
             "payemntData": data,
+            "courses": cartData.courses,
             "paymentStauts": {
                 status: "success",
                 "message": "Paid Successfully."
@@ -127,7 +128,8 @@ async function saveFailedPaymentStatus(data, message) {
     const mandatoryFieldsData = convertToJSONArray(data['mandatory fields'])
     const userID = mandatoryFieldsData[5]
     let user = await UserModel.findById(userID)
-
+    const cartData = await CartModel
+            .findOne({ _id: userID })
     const orderDetails = {
         "name": user.name,
         "address": mandatoryFieldsData[6],
@@ -136,6 +138,7 @@ async function saveFailedPaymentStatus(data, message) {
         "state": mandatoryFieldsData[9],
         "gstNumber": mandatoryFieldsData[10],
         "payemntData": data,
+        "courses": cartData.courses,
         "paymentStauts": {
             status: "failed",
             "message": message
