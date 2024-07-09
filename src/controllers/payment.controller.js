@@ -114,6 +114,7 @@ async function purchasedCourse(req, res) {
         await order.save()
         await user.save()
         deleteCart(userID)
+        console.log("Payment Success", userID, user.name)
         return res.redirect(`${process.env.APP_SERVICE_URL}/success`)
 
     } catch (error) {
@@ -145,6 +146,7 @@ async function saveFailedPaymentStatus(data, message) {
     const order = new OrdersModel(orderData)
 
     await order.save()
+    console.log("Payment Failed", userID, user.name)
     return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
 }
 
