@@ -74,7 +74,7 @@ async function purchasedCourse(req, res) {
     try {
         console.log(data);
         if (data['Response Code'] != 'E000') {
-            saveFailedPaymentStatus(data, "Payment Failed")
+            return saveFailedPaymentStatus(data, "Payment Failed")
         }
 
         const mandatoryFieldsData = convertToJSONArray(data['mandatory fields'])
@@ -118,7 +118,7 @@ async function purchasedCourse(req, res) {
         return res.redirect(`${process.env.APP_SERVICE_URL}/success`)
 
     } catch (error) {
-        saveFailedPaymentStatus(data, error.message)
+        return saveFailedPaymentStatus(data, error.message)
     }
 }
 

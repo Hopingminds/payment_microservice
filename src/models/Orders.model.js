@@ -22,6 +22,6 @@ const OrdersSchema = new mongoose.Schema({
     state: { type: String },
     gstNumber: {type:  String},
     payemntData: {type: Object}
-});
+},{ timestamps: true });
 
 module.exports =  mongoose.model.Orders || mongoose.model('Order', OrdersSchema);
