@@ -4,6 +4,7 @@ const CartModel = require("../models/Cart.model");
 const UserModel = require("../models/User.model");
 const CoursesModel = require("../models/Courses.model");
 const OrdersModel = require("../models/Orders.model");
+const mongoose = require('mongoose');
 
 const encryptAES128ECB = (plaintext, key) => {
     // Ensure the key is 16 bytes for AES-128
