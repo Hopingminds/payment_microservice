@@ -4,7 +4,6 @@ const CartModel = require("../models/Cart.model");
 const UserModel = require("../models/User.model");
 const CoursesModel = require("../models/Courses.model");
 const OrdersModel = require("../models/Orders.model");
-const mongoose = require('mongoose');
 
 const encryptAES128ECB = (plaintext, key) => {
     // Ensure the key is 16 bytes for AES-128
@@ -123,16 +122,15 @@ async function purchasedCourse(req, res) {
         }
         const courses = convertToCoursesArray(cartData.courses)
 
-        for (const courseId of courses) {
-            const courseObjectId = new mongoose.Types.ObjectId(courseId);
-            if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.toString() === courseObjectId.toString())) {
-                user.purchased_courses.push({ course: courseObjectId });
-            }
-        }
-
         // for (const courseId of courses) {
-        //     user.purchased_courses.push({ course: courseId })
+        //     if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.toString() === courseId.toString())) {
+        //         user.purchased_courses.push({ course: courseId });
+        //     }
         // }
+
+        for (const courseId of courses) {
+            user.purchased_courses.push({ course: courseId })
+        }
 
         let orderData = { ...orderDetails, purchasedBy: userID }
         const order = new OrdersModel(orderData)
