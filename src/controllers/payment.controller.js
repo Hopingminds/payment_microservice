@@ -70,11 +70,11 @@ function convertToCoursesArray(inputArray) {
 }
 
 async function purchasedCourse(req, res) {
+    const data = req.body
     try {
-        const data = req.body
         console.log(data);
         if (data['Response Code'] != 'E000') {
-            return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
+            saveFailedPaymentStatus(data, "Payment Failed")
         }
 
         const mandatoryFieldsData = convertToJSONArray(data['mandatory fields'])
@@ -90,11 +90,13 @@ async function purchasedCourse(req, res) {
             "country": mandatoryFieldsData[8],
             "state": mandatoryFieldsData[9],
             "gstNumber": mandatoryFieldsData[10],
+            "payemntData": data,
+            "paymentStauts": {
+                status: "success",
+                "message": "Paid Successfully."
+            }
         }
         const courses = convertToCoursesArray(cartData.courses)
-        if (!user) {
-            return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
-        }
 
         for (const courseId of courses) {
             if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.toString() === courseId.toString())) {
@@ -113,13 +115,37 @@ async function purchasedCourse(req, res) {
         await user.save()
         deleteCart(userID)
         return res.redirect(`${process.env.APP_SERVICE_URL}/success`)
+
     } catch (error) {
-        console.log(error);
-        return res.status(500).send({
-            title: error.message || "Internal Server Error",
-            message: "Please Contact hopingminds.com Admin"
-        })
+        saveFailedPaymentStatus(data, error.message)
     }
+}
+
+
+async function saveFailedPaymentStatus(data, message) {
+    const mandatoryFieldsData = convertToJSONArray(data['mandatory fields'])
+    const userID = mandatoryFieldsData[5]
+    let user = await UserModel.findById(userID)
+
+    const orderDetails = {
+        "name": user.name,
+        "address": mandatoryFieldsData[6],
+        "zip": mandatoryFieldsData[7],
+        "country": mandatoryFieldsData[8],
+        "state": mandatoryFieldsData[9],
+        "gstNumber": mandatoryFieldsData[10],
+        "payemntData": data,
+        "paymentStauts": {
+            status: "failed",
+            "message": message
+        }
+    }
+
+    let orderData = { ...orderDetails, purchasedBy: userID }
+    const order = new OrdersModel(orderData)
+
+    await order.save()
+    return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
 }
 
 
