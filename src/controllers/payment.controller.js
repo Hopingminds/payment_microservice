@@ -162,7 +162,7 @@ async function saveFailedPaymentStatus(res, data, message) {
         const basePrice = course.course.base_price;
         const discountPercentage = course.course.discount_percentage;
         const discountedPrice = basePrice * (1 - (discountPercentage / 100));
-        return discountedPrice;
+        return basePrice - discountedPrice;
     }, 0);
 
     let priceAfterGST = (totalBasePrice - totaldiscountedAmount)*1.18;
