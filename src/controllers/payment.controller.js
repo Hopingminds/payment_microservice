@@ -92,7 +92,7 @@ async function purchasedCourse(req, res) {
             return total + course.course.base_price;
 		}, 0);
 
-        let totaldiscountedAmount = cart.courses.reduce((total, course) => {
+        let totaldiscountedAmount = cartData.courses.reduce((total, course) => {
             const basePrice = course.course.base_price;
             const discountPercentage = course.course.discount_percentage;
             const discountedPrice = basePrice * (1 - (discountPercentage / 100));
@@ -158,7 +158,7 @@ async function saveFailedPaymentStatus(res, data, message) {
         return total + course.course.base_price;
     }, 0);
 
-    let totaldiscountedAmount = cart.courses.reduce((total, course) => {
+    let totaldiscountedAmount = cartData.courses.reduce((total, course) => {
         const basePrice = course.course.base_price;
         const discountPercentage = course.course.discount_percentage;
         const discountedPrice = basePrice * (1 - (discountPercentage / 100));
