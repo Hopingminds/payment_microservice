@@ -96,7 +96,7 @@ async function purchasedCourse(req, res) {
             const basePrice = course.course.base_price;
             const discountPercentage = course.course.discount_percentage;
             const discountedPrice = basePrice * (1 - (discountPercentage / 100));
-            return basePrice - discountedPrice;
+            return total + basePrice - discountedPrice;
         }, 0);
 
         let priceAfterGST = (totalBasePrice - totaldiscountedAmount)*1.18;
@@ -123,8 +123,9 @@ async function purchasedCourse(req, res) {
         const courses = convertToCoursesArray(cartData.courses)
 
         for (const courseId of courses) {
-            if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.toString() === courseId.toString())) {
-                user.purchased_courses.push({ course: courseId });
+            const courseObjectId = mongoose.Types.ObjectId(courseId);
+            if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.toString() === courseObjectId.toString())) {
+                user.purchased_courses.push({ course: courseObjectId });
             }
         }
 
@@ -163,7 +164,7 @@ async function saveFailedPaymentStatus(res, data, message) {
         const basePrice = course.course.base_price;
         const discountPercentage = course.course.discount_percentage;
         const discountedPrice = basePrice * (1 - (discountPercentage / 100));
-        return basePrice - discountedPrice;
+        return total + basePrice - discountedPrice;
     }, 0);
 
     let priceAfterGST = (totalBasePrice - totaldiscountedAmount)*1.18;
