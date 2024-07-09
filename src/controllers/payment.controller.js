@@ -85,8 +85,22 @@ async function purchasedCourse(req, res) {
         const userID = mandatoryFieldsData[5]
         const cartData = await CartModel
             .findOne({ _id: userID })
+            .populate('courses.course')
         let user = await UserModel.findById(userID)
 
+        let totalBasePrice = cartData.courses.reduce((total, course) => {
+            return total + course.course.base_price;
+		}, 0);
+
+        let totaldiscountedAmount = cart.courses.reduce((total, course) => {
+            const basePrice = course.course.base_price;
+            const discountPercentage = course.course.discount_percentage;
+            const discountedPrice = basePrice * (1 - (discountPercentage / 100));
+            return discountedPrice;
+        }, 0);
+
+        let priceAfterGST = (totalBasePrice - totaldiscountedAmount)*1.18;
+        let gstAmount = priceAfterGST - (totalBasePrice - totaldiscountedAmount);
         const orderDetails = {
             "name": user.name,
             "address": mandatoryFieldsData[6],
@@ -99,7 +113,11 @@ async function purchasedCourse(req, res) {
             "paymentStauts": {
                 status: "success",
                 "message": "Paid Successfully."
-            }
+            },
+            "transactionAmount": data['Transaction Amount'],
+            "basePrice": totalBasePrice,
+            "discountedAmount": totaldiscountedAmount,
+            "gstAmount": gstAmount
         }
         const courses = convertToCoursesArray(cartData.courses)
 
@@ -134,6 +152,22 @@ async function saveFailedPaymentStatus(res, data, message) {
     let user = await UserModel.findById(userID)
     const cartData = await CartModel
             .findOne({ _id: userID })
+            .populate('courses.course')
+
+    let totalBasePrice = cartData.courses.reduce((total, course) => {
+        return total + course.course.base_price;
+    }, 0);
+
+    let totaldiscountedAmount = cart.courses.reduce((total, course) => {
+        const basePrice = course.course.base_price;
+        const discountPercentage = course.course.discount_percentage;
+        const discountedPrice = basePrice * (1 - (discountPercentage / 100));
+        return discountedPrice;
+    }, 0);
+
+    let priceAfterGST = (totalBasePrice - totaldiscountedAmount)*1.18;
+    let gstAmount = priceAfterGST - (totalBasePrice - totaldiscountedAmount);
+
     const orderDetails = {
         "name": user.name,
         "address": mandatoryFieldsData[6],
@@ -146,7 +180,11 @@ async function saveFailedPaymentStatus(res, data, message) {
         "paymentStauts": {
             status: "failed",
             "message": message
-        }
+        },
+        "transactionAmount": data['Transaction Amount'],
+        "basePrice": totalBasePrice,
+        "discountedAmount": totaldiscountedAmount,
+        "gstAmount": gstAmount
     }
 
     let orderData = { ...orderDetails, purchasedBy: userID }
