@@ -117,7 +117,8 @@ async function purchasedCourse(req, res) {
             "transactionAmount": data['Transaction Amount'],
             "basePrice": totalBasePrice,
             "discountedAmount": totaldiscountedAmount,
-            "gstAmount": gstAmount
+            "gstAmount": gstAmount/2,
+            "sgstAmount": gstAmount/2
         }
         const courses = convertToCoursesArray(cartData.courses)
 
@@ -184,7 +185,8 @@ async function saveFailedPaymentStatus(res, data, message) {
         "transactionAmount": data['Transaction Amount'],
         "basePrice": totalBasePrice,
         "discountedAmount": totaldiscountedAmount,
-        "gstAmount": gstAmount
+        "gstAmount": gstAmount/2,
+        "sgstAmount": gstAmount/2
     }
 
     let orderData = { ...orderDetails, purchasedBy: userID }
