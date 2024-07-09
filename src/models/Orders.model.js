@@ -27,6 +27,7 @@ const OrdersSchema = new mongoose.Schema({
     basePrice: {type: Number},
     discountedAmount: {type: Number},
     gstAmount: {type: Number},
+    sgstAmount: {type: Number},
 },{ timestamps: true });
 
 module.exports =  mongoose.model.Orders || mongoose.model('Order', OrdersSchema);
