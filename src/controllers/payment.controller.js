@@ -104,9 +104,9 @@ async function purchasedCourse(req, res) {
             }
         }
 
-        for (const courseId of courses) {
-            user.purchased_courses.push({ course: courseId })
-        }
+        // for (const courseId of courses) {
+        //     user.purchased_courses.push({ course: courseId })
+        // }
 
         let orderData = { ...orderDetails, purchasedBy: userID }
         const order = new OrdersModel(orderData)

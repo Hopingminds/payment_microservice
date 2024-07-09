@@ -21,7 +21,7 @@ const OrdersSchema = new mongoose.Schema({
     country: { type: String },
     state: { type: String },
     gstNumber: {type:  String},
-    payemntData: {type: Array}
+    payemntData: {type: Object}
 });
 
 module.exports =  mongoose.model.Orders || mongoose.model('Order', OrdersSchema);
