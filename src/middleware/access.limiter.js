@@ -52,7 +52,7 @@ const limiter = rateLimit({
 });
 
 const apiLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 10 * 1000, // 10 sec
   max: 1, // limit each IP to 10 login requests per `window` (here, per 1 minutes)
   message: { message: 'Too many login attempts from this IP, please try again after a 60 second pause' },
   handler: async (req, res, _next, options) => {
