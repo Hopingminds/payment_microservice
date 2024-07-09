@@ -124,7 +124,7 @@ async function purchasedCourse(req, res) {
         const courses = convertToCoursesArray(cartData.courses)
 
         for (const courseId of courses) {
-            const courseObjectId = mongoose.Types.ObjectId(courseId);
+            const courseObjectId = new mongoose.Types.ObjectId(courseId);
             if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.toString() === courseObjectId.toString())) {
                 user.purchased_courses.push({ course: courseObjectId });
             }
