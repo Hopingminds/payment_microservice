@@ -69,10 +69,6 @@ async function makePayment(req, res) {
     })
 }
 
-function convertToCoursesArray(inputArray) {
-    return inputArray.map(item => item.course.toString())
-}
-
 async function purchasedCourse(req, res) {
     const data = req.body
     try {
@@ -212,10 +208,10 @@ async function purchasedCourseFucntion(req, res, userID, email, phone, name, add
             gstNumber
         };
 
-        const courses = convertToCoursesArray(cartData.courses);
+        const courses = cartData.courses.map(courseItem => courseItem.course._id);
 
         for (const courseId of courses) {
-            if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.toString() === courseId.toString())) {
+            if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.equals(courseId))) {
                 user.purchased_courses.push({ course: courseId });
             }
         }
