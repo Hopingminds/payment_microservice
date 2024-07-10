@@ -120,16 +120,12 @@ async function purchasedCourse(req, res) {
             "gstAmount": gstAmount/2,
             "sgstAmount": gstAmount/2
         }
-        const courses = convertToCoursesArray(cartData.courses)
-
-        // for (const courseId of courses) {
-        //     if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.toString() === courseId.toString())) {
-        //         user.purchased_courses.push({ course: courseId });
-        //     }
-        // }
+        const courses = cartData.courses.map(courseItem => courseItem.course._id);
 
         for (const courseId of courses) {
-            user.purchased_courses.push({ course: courseId })
+            if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.equals(courseId))) {
+                user.purchased_courses.push({ course: courseId });
+            }
         }
 
         let orderData = { ...orderDetails, purchasedBy: userID }
