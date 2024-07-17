@@ -4,6 +4,7 @@ const CartModel = require("../models/Cart.model");
 const UserModel = require("../models/User.model");
 const CoursesModel = require("../models/Courses.model");
 const OrdersModel = require("../models/Orders.model");
+const InstructorModel = require("../models/Instructor.model");
 
 const encryptAES128ECB = (plaintext, key) => {
     // Ensure the key is 16 bytes for AES-128
@@ -117,10 +118,16 @@ async function purchasedCourse(req, res) {
             "sgstAmount": gstAmount/2
         }
         const courses = cartData.courses.map(courseItem => courseItem.course._id);
+        const instructorsToUpdate = new Set();
 
         for (const courseId of courses) {
             if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.equals(courseId))) {
                 user.purchased_courses.push({ course: courseId });
+                // Track the instructors to update
+                const course = await CoursesModel.findById(courseId).populate('instructor');
+                if (course && course.instructor) {
+                    instructorsToUpdate.add(course.instructor._id);
+                }
             }
         }
 
@@ -129,7 +136,12 @@ async function purchasedCourse(req, res) {
 
         await order.save()
         await user.save()
-        deleteCart(userID)
+
+        for (const instructorId of instructorsToUpdate) {
+            await InstructorModel.findByIdAndUpdate(instructorId, { $inc: { noOfStudents: 1 } });
+        }
+
+        await deleteCart(userID)
         console.log("Payment Success", userID, user.name)
         return res.redirect(`${process.env.APP_SERVICE_URL}/success`)
 
@@ -209,10 +221,16 @@ async function purchasedCourseFucntion(req, res, userID, email, phone, name, add
         };
 
         const courses = cartData.courses.map(courseItem => courseItem.course._id);
+        const instructorsToUpdate = new Set();
 
         for (const courseId of courses) {
             if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.equals(courseId))) {
                 user.purchased_courses.push({ course: courseId });
+                // Track the instructors to update
+                const course = await CoursesModel.findById(courseId).populate('instructor');
+                if (course && course.instructor) {
+                    instructorsToUpdate.add(course.instructor._id);
+                }
             }
         }
 
@@ -221,6 +239,11 @@ async function purchasedCourseFucntion(req, res, userID, email, phone, name, add
 
         await order.save();
         await user.save();
+
+        for (const instructorId of instructorsToUpdate) {
+            await InstructorModel.findByIdAndUpdate(instructorId, { $inc: { noOfStudents: 1 } });
+        }
+
         await deleteCart(userID);
 
         return res.redirect(`${process.env.APP_SERVICE_URL}/success`);
