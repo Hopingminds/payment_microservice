@@ -53,7 +53,7 @@ const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, cou
 
     // Construct the encrypted URL
     const encryptedUrl = `https://eazypay.icicibank.com/EazyPG?merchantid=${merchant_id}&mandatory fields=${encodeURIComponent(e_man_fields)}&optional fields=${encodeURIComponent(opt_fields)}&returnurl=${encodeURIComponent(e_return_url)}&Reference No=${encodeURIComponent(e_ref_no)}&submerchantid=${encodeURIComponent(e_sub_mer_id)}&transaction amount=${encodeURIComponent(e_amt)}&paymode=${encodeURIComponent(e_paymode)}`;
-
+    console.log(encryptedUrl.replaceAll(' ', '%20'))
     return encryptedUrl.replaceAll(' ', '%20')
 };
 
@@ -85,19 +85,6 @@ async function purchasedCourse(req, res) {
             .populate('courses.course')
         let user = await UserModel.findById(userID)
 
-        let totalBasePrice = cartData.courses.reduce((total, course) => {
-            return total + course.course.base_price;
-		}, 0);
-
-        let totaldiscountedAmount = cartData.courses.reduce((total, course) => {
-            const basePrice = course.course.base_price;
-            const discountPercentage = course.course.discount_percentage;
-            const discountedPrice = basePrice * (1 - (discountPercentage / 100));
-            return total + basePrice - discountedPrice;
-        }, 0);
-
-        let priceAfterGST = (totalBasePrice - totaldiscountedAmount)*1.18;
-        let gstAmount = priceAfterGST - (totalBasePrice - totaldiscountedAmount);
         const orderDetails = {
             "name": user.name,
             "address": mandatoryFieldsData[6],
@@ -112,10 +99,6 @@ async function purchasedCourse(req, res) {
                 "message": "Paid Successfully."
             },
             "transactionAmount": data['Transaction Amount'],
-            "basePrice": totalBasePrice,
-            "discountedAmount": totaldiscountedAmount,
-            "gstAmount": gstAmount/2,
-            "sgstAmount": gstAmount/2
         }
         const courses = cartData.courses.map(courseItem => courseItem.course._id);
         const instructorsToUpdate = new Set();
@@ -159,19 +142,6 @@ async function saveFailedPaymentStatus(res, data, message) {
             .findOne({ _id: userID })
             .populate('courses.course')
 
-    let totalBasePrice = cartData.courses.reduce((total, course) => {
-        return total + course.course.base_price;
-    }, 0);
-
-    let totaldiscountedAmount = cartData.courses.reduce((total, course) => {
-        const basePrice = course.course.base_price;
-        const discountPercentage = course.course.discount_percentage;
-        const discountedPrice = basePrice * (1 - (discountPercentage / 100));
-        return total + basePrice - discountedPrice;
-    }, 0);
-
-    let priceAfterGST = (totalBasePrice - totaldiscountedAmount)*1.18;
-    let gstAmount = priceAfterGST - (totalBasePrice - totaldiscountedAmount);
 
     const orderDetails = {
         "name": user.name,
@@ -187,10 +157,6 @@ async function saveFailedPaymentStatus(res, data, message) {
             "message": message
         },
         "transactionAmount": data['Transaction Amount'],
-        "basePrice": totalBasePrice,
-        "discountedAmount": totaldiscountedAmount,
-        "gstAmount": gstAmount/2,
-        "sgstAmount": gstAmount/2
     }
 
     let orderData = { ...orderDetails, purchasedBy: userID }

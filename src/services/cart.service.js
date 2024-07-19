@@ -33,13 +33,9 @@ async function getcartValue(userID) {
 		}
 
         let totalAmount = cart.courses.reduce((total, course) => {
-            const discountedPrice = course.course.base_price * (1 - (course.course.discount_percentage / 100));
-			return total + discountedPrice;
-		}, 0);
-
-        // Adding 18% tax to the total amount
-        totalAmount = totalAmount * 1.18;
-
+            return total + course.course.base_price;
+        }, 0);
+        console.log(totalAmount)
 		return parseFloat(totalAmount).toFixed(2);
 	} catch (error) {
 		console.error(error.message)
