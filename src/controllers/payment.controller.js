@@ -53,7 +53,7 @@ const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, cou
 
     // Construct the encrypted URL
     const encryptedUrl = `https://eazypay.icicibank.com/EazyPG?merchantid=${merchant_id}&mandatory fields=${encodeURIComponent(e_man_fields)}&optional fields=${encodeURIComponent(opt_fields)}&returnurl=${encodeURIComponent(e_return_url)}&Reference No=${encodeURIComponent(e_ref_no)}&submerchantid=${encodeURIComponent(e_sub_mer_id)}&transaction amount=${encodeURIComponent(e_amt)}&paymode=${encodeURIComponent(e_paymode)}`;
-    console.log(encryptedUrl.replaceAll(' ', '%20'))
+    // console.log(encryptedUrl.replaceAll(' ', '%20'))
     return encryptedUrl.replaceAll(' ', '%20')
 };
 
