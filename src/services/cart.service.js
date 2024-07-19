@@ -33,7 +33,8 @@ async function getcartValue(userID) {
 		}
 
         let totalAmount = cart.courses.reduce((total, course) => {
-            return total + course.course.base_price;
+            const discountedPrice = course.course.base_price * (1 - (course.course.discount_percentage / 100))
+            return total + discountedPrice;
         }, 0);
         console.log(totalAmount)
 		return parseFloat(totalAmount).toFixed(2);
