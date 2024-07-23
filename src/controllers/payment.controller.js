@@ -58,8 +58,8 @@ const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, cou
 };
 
 async function makePayment(req, res) {
-    const { userID, email, phone, name, address, zip, country, state, gstNumber } = req.query
-    const cartValue = await getcartValue(userID)
+    const { userID, email, phone, name, address, zip, country, state, gstNumber, promoCode } = req.query
+    const cartValue = await getcartValue(userID, promoCode)
     if (cartValue <= 0) {
         return purchasedCourseFucntion(req, res, userID, email, phone, name, address, zip, country, state, gstNumber)
     }
