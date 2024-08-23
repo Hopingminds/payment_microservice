@@ -30,11 +30,11 @@ function convertToJSONArray(dataString) {
     return values;
 }
 
-const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, country, state, gstNumber) => {
+const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, country, state, gstNumber, sub_mer_id) => {
     const merchant_id = "383138";
     const key = process.env.AES_KEY;
     const ref_no = Math.floor(Math.random() * 9990) + 10 + Date.now();
-    const sub_mer_id = "45";
+    // const sub_mer_id = "45";
     const amt = amount.toString();
     const return_url = `${process.env.APP_BASE_URL}/api/v1/payment-status`; // Your return URL
     const paymode = "9";
@@ -58,15 +58,17 @@ const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, cou
 };
 
 async function makePayment(req, res) {
-    const { userID, email, phone, name, address, zip, country, state, gstNumber, promoCode } = req.query
+    const { userID, email, phone, name, address, zip, country, state, gstNumber, promoCode, subMerId } = req.query
     const cartValue = await getcartValue(userID, promoCode)
+    const sub_mer_id = subMerId || "45";
+
     if (cartValue <= 0) {
         return purchasedCourseFucntion(req, res, userID, email, phone, name, address, zip, country, state, gstNumber)
     }
 
     res.status(200).send({
         "result_code": 0,
-        payment_link: handleGenerateUrl(email, cartValue, phone, userID, name, address, zip, country, state, gstNumber)
+        payment_link: handleGenerateUrl(email, cartValue, phone, userID, name, address, zip, country, state, gstNumber, sub_mer_id)
     })
 }
 
@@ -126,6 +128,9 @@ async function purchasedCourse(req, res) {
 
         await deleteCart(userID)
         console.log("Payment Success", userID, user.name)
+        if (data['SubMerchantId'] === 10) {
+            return res.status(200).json({ success: true, data });
+        }
         return res.redirect(`${process.env.APP_SERVICE_URL}/success`)
 
     } catch (error) {
@@ -164,6 +169,9 @@ async function saveFailedPaymentStatus(res, data, message) {
 
     await order.save()
     console.log("Payment Failed", userID, user.name)
+    if (data['SubMerchantId'] === 10) {
+        return res.status(200).json({ success: false, data });
+    }
     return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
 }
 
