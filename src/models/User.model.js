@@ -3,16 +3,15 @@ const mongoose = require('mongoose');
 const UserSchema = new mongoose.Schema({
     password: {
         type: String,
-        required: [true, "Please provide a password"],
         unique : false,
     },
     email: {
         type: String,
-        required : [true, "Please provide a unique email"],
         unique: true,
     },
     phone: {
         type: Number,
+        unique: true,
     },
     name: { type: String},
     profile: { type: String},
@@ -32,6 +31,30 @@ const UserSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Courses'
             },
+            BatchId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Batch',
+                default: null
+            },
+            courseStartDate: { type: Date },
+            allotedByCollege: {type: Boolean, default: false},
+            completed_lessons: [{type: mongoose.Schema.Types.ObjectId, default: null}],
+            completed_assignments: [{type: mongoose.Schema.Types.ObjectId, default: null}]
+        }
+    ],
+    purchased_internships:[
+        {
+            internship: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Internship'
+            },
+            BatchId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Batch',
+                default: null
+            },
+            internshipStartDate: { type: Date },
+            allotedByCollege: {type: Boolean, default: false},
             completed_lessons: [{type: mongoose.Schema.Types.ObjectId, default: null}],
             completed_assignments: [{type: mongoose.Schema.Types.ObjectId, default: null}]
         }
@@ -79,7 +102,13 @@ const UserSchema = new mongoose.Schema({
     },
     isCourseOpened: {type: Boolean, default: false},
     isProfileComplete: {type: Boolean, default: false},
+    otp: {
+        type: String,
+    },
+    otpExpires: {
+        type: Date,
+    },
     token: {type: String, default: null}
-});
+}, { timestamps: true });
 
 module.exports =  mongoose.model.Users || mongoose.model('User', UserSchema);

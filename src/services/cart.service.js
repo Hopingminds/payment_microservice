@@ -14,6 +14,7 @@ async function deleteCart(userID) {
 
         // Empty the cart by setting the courses array to an empty array
         cart.courses = [];
+        cart.internships = [];
 
         await cart.save();
 
@@ -30,15 +31,23 @@ async function getcartValue(userID, promoCode) {
 		const cart = await CartModel
 			.findOne({ _id: userID })
 			.populate('courses.course')
+			.populate('internships.internship')
 
 		if (!cart) {
 			return false
 		}
 
+		// Calculate total amount for course
         let totalAmount = cart.courses.reduce((total, course) => {
-            const discountedPrice = course.course.base_price * (1 - (course.course.discount_percentage / 100))
+            const discountedPrice = course.course.base_price * (1 - (course.course.discount_percentage / 100));
             return total + discountedPrice;
         }, 0);
+
+		// Add total amount for internships
+        totalAmount += cart.internships.reduce((total, internship) => {
+            const discountedPrice = internship.internship.base_price * (1 - (internship.internship.discount_percentage / 100));
+            return total + discountedPrice;
+        }, 0)
 
         // Check if promoCode is provided
 		if (promoCode) {

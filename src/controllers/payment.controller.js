@@ -85,6 +85,8 @@ async function purchasedCourse(req, res) {
         const cartData = await CartModel
             .findOne({ _id: userID })
             .populate('courses.course')
+            .populate('internships.internship')
+
         let user = await UserModel.findById(userID)
 
         const orderDetails = {
@@ -95,14 +97,16 @@ async function purchasedCourse(req, res) {
             "state": mandatoryFieldsData[9],
             "gstNumber": mandatoryFieldsData[10],
             "payemntData": data,
-            "courses": cartData.courses,
+            "courses": cartData,
             "paymentStauts": {
                 status: "success",
                 "message": "Paid Successfully."
             },
             "transactionAmount": data['Transaction Amount'],
         }
+        
         const courses = cartData.courses.map(courseItem => courseItem.course._id);
+        const internships = cartData.internships.map(internshipItem => internshipItem.internship._id);
         const instructorsToUpdate = new Set();
 
         for (const courseId of courses) {
@@ -116,11 +120,17 @@ async function purchasedCourse(req, res) {
             }
         }
 
-        let orderData = { ...orderDetails, purchasedBy: userID }
-        const order = new OrdersModel(orderData)
+        for (const internshipId of internships) {
+            if (!user.purchased_internships.some(purchasedCourse => purchasedCourse.course.equals(internshipId))) {
+                user.purchased_internships.push({ course: internshipId });
+            }
+        }
 
-        await order.save()
-        await user.save()
+        let orderData = { ...orderDetails, purchasedBy: userID };
+        const order = new OrdersModel(orderData);
+
+        await order.save();
+        await user.save();
 
         for (const instructorId of instructorsToUpdate) {
             await InstructorModel.findByIdAndUpdate(instructorId, { $inc: { noOfStudents: 1 } });
@@ -146,6 +156,7 @@ async function saveFailedPaymentStatus(res, data, message) {
     const cartData = await CartModel
             .findOne({ _id: userID })
             .populate('courses.course')
+            .populate('internships.internship')
 
 
     const orderDetails = {
@@ -156,7 +167,7 @@ async function saveFailedPaymentStatus(res, data, message) {
         "state": mandatoryFieldsData[9],
         "gstNumber": mandatoryFieldsData[10],
         "payemntData": data,
-        "courses": cartData.courses,
+        "courses": cartData,
         "paymentStauts": {
             status: "failed",
             "message": message
@@ -195,6 +206,7 @@ async function purchasedCourseFucntion(req, res, userID, email, phone, name, add
         };
 
         const courses = cartData.courses.map(courseItem => courseItem.course._id);
+        const internships = cartData.internships.map(internshipItem => internshipItem.internship._id);
         const instructorsToUpdate = new Set();
 
         for (const courseId of courses) {
@@ -205,6 +217,12 @@ async function purchasedCourseFucntion(req, res, userID, email, phone, name, add
                 if (course && course.instructor) {
                     instructorsToUpdate.add(course.instructor._id);
                 }
+            }
+        }
+
+        for (const internshipId of internships) {
+            if (!user.purchased_internships.some(purchasedCourse => purchasedCourse.course.equals(internshipId))) {
+                user.purchased_internships.push({ course: internshipId });
             }
         }
 

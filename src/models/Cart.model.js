@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const CoursesModel = require('./Courses.model')
+const InternshipModel = require('./Internship.model')
 
 const CartSchema = new mongoose.Schema({
     _id :{ type: mongoose.Schema.Types.ObjectId, 
@@ -11,6 +12,14 @@ const CartSchema = new mongoose.Schema({
             course:{
                 type: mongoose.Schema.Types.ObjectId,
                 ref: CoursesModel,
+            }
+        }
+    ],
+    internships:[
+        {
+            internship:{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: InternshipModel
             }
         }
     ]
