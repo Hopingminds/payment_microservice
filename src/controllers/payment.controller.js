@@ -105,24 +105,45 @@ async function purchasedCourse(req, res) {
             "transactionAmount": data['Transaction Amount'],
         }
         
-        const courses = cartData.courses.map(courseItem => courseItem.course._id);
-        const internships = cartData.internships.map(internshipItem => internshipItem.internship._id);
         const instructorsToUpdate = new Set();
 
-        for (const courseId of courses) {
-            if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.equals(courseId))) {
-                user.purchased_courses.push({ course: courseId });
-                // Track the instructors to update
-                const course = await CoursesModel.findById(courseId).populate('instructor');
-                if (course && course.instructor) {
-                    instructorsToUpdate.add(course.instructor._id);
+        // Check if courses exist in the cart
+        if (cartData.courses && cartData.courses.length > 0) {
+            const courses = cartData.courses.map(courseItem => courseItem.course._id);
+
+            // Initialize purchased_courses if not present
+            if (!user.purchased_courses) {
+                user.purchased_courses = [];
+            }
+
+            // Process courses
+            for (const courseId of courses) {
+                if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course && purchasedCourse.course.equals(courseId))) {
+                    user.purchased_courses.push({ course: courseId });
+
+                    // Track the instructors to update
+                    const course = await CoursesModel.findById(courseId).populate('instructor');
+                    if (course && course.instructor) {
+                        instructorsToUpdate.add(course.instructor._id);
+                    }
                 }
             }
         }
 
-        for (const internshipId of internships) {
-            if (!user.purchased_internships.some(purchasedCourse => purchasedCourse.course.equals(internshipId))) {
-                user.purchased_internships.push({ course: internshipId });
+        // Check if internships exist in the cart
+        if (cartData.internships && cartData.internships.length > 0) {
+            const internships = cartData.internships.map(internshipItem => internshipItem.internship._id);
+
+            // Initialize purchased_internships if not present
+            if (!user.purchased_internships) {
+                user.purchased_internships = [];
+            }
+
+            // Process internships
+            for (const internshipId of internships) {
+                if (!user.purchased_internships.some(purchasedInternship => purchasedInternship.internship && purchasedInternship.internship.equals(internshipId))) {
+                    user.purchased_internships.push({ internship: internshipId });
+                }
             }
         }
 
@@ -205,24 +226,45 @@ async function purchasedCourseFucntion(req, res, userID, email, phone, name, add
             gstNumber
         };
 
-        const courses = cartData.courses.map(courseItem => courseItem.course._id);
-        const internships = cartData.internships.map(internshipItem => internshipItem.internship._id);
         const instructorsToUpdate = new Set();
 
-        for (const courseId of courses) {
-            if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course.equals(courseId))) {
-                user.purchased_courses.push({ course: courseId });
-                // Track the instructors to update
-                const course = await CoursesModel.findById(courseId).populate('instructor');
-                if (course && course.instructor) {
-                    instructorsToUpdate.add(course.instructor._id);
+        // Check if courses exist in the cart
+        if (cartData.courses && cartData.courses.length > 0) {
+            const courses = cartData.courses.map(courseItem => courseItem.course._id);
+
+            // Initialize purchased_courses if not present
+            if (!user.purchased_courses) {
+                user.purchased_courses = [];
+            }
+
+            // Process courses
+            for (const courseId of courses) {
+                if (!user.purchased_courses.some(purchasedCourse => purchasedCourse.course && purchasedCourse.course.equals(courseId))) {
+                    user.purchased_courses.push({ course: courseId });
+
+                    // Track the instructors to update
+                    const course = await CoursesModel.findById(courseId).populate('instructor');
+                    if (course && course.instructor) {
+                        instructorsToUpdate.add(course.instructor._id);
+                    }
                 }
             }
         }
 
-        for (const internshipId of internships) {
-            if (!user.purchased_internships.some(purchasedCourse => purchasedCourse.course.equals(internshipId))) {
-                user.purchased_internships.push({ course: internshipId });
+        // Check if internships exist in the cart
+        if (cartData.internships && cartData.internships.length > 0) {
+            const internships = cartData.internships.map(internshipItem => internshipItem.internship._id);
+
+            // Initialize purchased_internships if not present
+            if (!user.purchased_internships) {
+                user.purchased_internships = [];
+            }
+
+            // Process internships
+            for (const internshipId of internships) {
+                if (!user.purchased_internships.some(purchasedInternship => purchasedInternship.internship && purchasedInternship.internship.equals(internshipId))) {
+                    user.purchased_internships.push({ internship: internshipId });
+                }
             }
         }
 
