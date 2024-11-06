@@ -45,8 +45,7 @@ async function getcartValue(userID, promoCode) {
 
 		// Add total amount for internships
         totalAmount += cart.internships.reduce((total, internship) => {
-            const discountedPrice = internship.internship.base_price * (1 - (internship.internship.discount_percentage / 100));
-            return total + discountedPrice;
+            return total + internship.internship.registration_price;
         }, 0)
 
         // Check if promoCode is provided

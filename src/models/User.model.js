@@ -50,7 +50,7 @@ const UserSchema = new mongoose.Schema({
             },
             BatchId: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'Batch',
+                ref: 'BatchInternship',
                 default: null
             },
             internshipStartDate: { type: Date },

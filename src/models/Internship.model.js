@@ -5,6 +5,7 @@ const InternshipSchema = new mongoose.Schema({
     title: { type: String },
     slug: { type: String },
     overview: { type: String },
+    registration_price: { type: Number },
     base_price: { type: Number },
     discount_percentage: { type: Number },
 });
