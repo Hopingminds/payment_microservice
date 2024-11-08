@@ -5,6 +5,11 @@ const PromoSchema = new mongoose.Schema({
         type: String,
         unique: true,
     },
+    applicableTo: {
+        type: String,
+        enum: ["courses", "internships", "both"],
+        default: "both"
+    },
     validTill: {
         type: Date,
         required: true,
@@ -13,11 +18,11 @@ const PromoSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    quantity:{
+    quantity: {
         type: Number,
         default: Infinity
     },
-    forCollege:{
+    forCollege: {
         type: String,
     },
 });

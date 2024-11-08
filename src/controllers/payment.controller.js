@@ -5,6 +5,7 @@ const UserModel = require("../models/User.model");
 const CoursesModel = require("../models/Courses.model");
 const OrdersModel = require("../models/Orders.model");
 const InstructorModel = require("../models/Instructor.model");
+const PendingPaymentsModel = require("../models/PendingPayments.model");
 
 const encryptAES128ECB = (plaintext, key) => {
     // Ensure the key is 16 bytes for AES-128
@@ -58,12 +59,12 @@ const handleGenerateUrl = (email, amount, phone, userID, name, address, zip, cou
 };
 
 async function makePayment(req, res) {
-    const { userID, email, phone, name, address, zip, country, state, gstNumber, promoCode, subMerId } = req.query
-    const cartValue = await getcartValue(userID, promoCode)
+    const { userID, email, phone, name, address, zip, country, state, gstNumber, promoCode, subMerId, internshipPayment } = req.query
+    const cartValue = await getcartValue(userID, promoCode, internshipPayment)
     const sub_mer_id = subMerId || "45";
 
     if (cartValue <= 0) {
-        return purchasedCourseFucntion(req, res, userID, email, phone, name, address, zip, country, state, gstNumber)
+        return FreePurchaseFunction(req, res, userID, email, phone, name, address, zip, country, state, gstNumber)
     }
 
     res.status(200).send({
@@ -143,6 +144,11 @@ async function purchasedCourse(req, res) {
             for (const internshipId of internships) {
                 if (!user.purchased_internships.some(purchasedInternship => purchasedInternship.internship && purchasedInternship.internship.equals(internshipId))) {
                     user.purchased_internships.push({ internship: internshipId });
+
+                    await PendingPaymentsModel.updateOne(
+                        { user: userID, internship: internshipId, "payments.isCompleted": false },
+                        { $set: { "payments.$.isCompleted": true } }
+                    );
                 }
             }
         }
@@ -171,44 +177,59 @@ async function purchasedCourse(req, res) {
 
 
 async function saveFailedPaymentStatus(res, data, message) {
-    const mandatoryFieldsData = convertToJSONArray(data['mandatory fields'])
-    const userID = mandatoryFieldsData[5]
-    let user = await UserModel.findById(userID)
-    const cartData = await CartModel
-            .findOne({ _id: userID })
-            .populate('courses.course')
-            .populate('internships.internship')
+    try {
+        const mandatoryFieldsData = convertToJSONArray(data['mandatory fields'])
+
+        const userID = mandatoryFieldsData[5]
+        let user = await UserModel.findById(userID)
+        const cartData = await CartModel
+                .findOne({ _id: userID })
+                .populate('courses.course')
+                .populate('internships.internship')
 
 
-    const orderDetails = {
-        "name": user.name,
-        "address": mandatoryFieldsData[6],
-        "zip": mandatoryFieldsData[7],
-        "country": mandatoryFieldsData[8],
-        "state": mandatoryFieldsData[9],
-        "gstNumber": mandatoryFieldsData[10],
-        "payemntData": data,
-        "courses": cartData,
-        "paymentStauts": {
-            status: "failed",
-            "message": message
-        },
-        "transactionAmount": data['Transaction Amount'],
+        const orderDetails = {
+            "name": user.name,
+            "address": mandatoryFieldsData[6],
+            "zip": mandatoryFieldsData[7],
+            "country": mandatoryFieldsData[8],
+            "state": mandatoryFieldsData[9],
+            "gstNumber": mandatoryFieldsData[10],
+            "payemntData": data,
+            "courses": cartData,
+            "paymentStauts": {
+                status: "failed",
+                "message": message
+            },
+            "transactionAmount": data['Transaction Amount'],
+        }
+
+        let orderData = { ...orderDetails, purchasedBy: userID }
+        const order = new OrdersModel(orderData)
+
+        await order.save()
+
+        for (const internship of cartData.internships) {
+            try {
+                await PendingPaymentsModel.deleteOne({ internship: internship.internship._id, user: userID });
+            } catch (error) {
+                console.error(`Failed to delete pending payment for internship ${internship.internship._id} and user ${userID}: ${error.message}`);
+            }
+        }
+
+        console.log("Payment Failed", userID, user.name)
+        if (data['SubMerchantId'] === 10) {
+            return res.status(200).json({ success: false, data });
+        }
+        return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
+    } catch (error) {
+        console.error(error);
+        return res.redirect(`${process.env.APP_SERVICE_URL}/error`);
     }
-
-    let orderData = { ...orderDetails, purchasedBy: userID }
-    const order = new OrdersModel(orderData)
-
-    await order.save()
-    console.log("Payment Failed", userID, user.name)
-    if (data['SubMerchantId'] === 10) {
-        return res.status(200).json({ success: false, data });
-    }
-    return res.redirect(`${process.env.APP_SERVICE_URL}/error`)
 }
 
 
-async function purchasedCourseFucntion(req, res, userID, email, phone, name, address, zip, country, state, gstNumber) {
+async function FreePurchaseFunction(req, res, userID, email, phone, name, address, zip, country, state, gstNumber) {
     try {
         const cartData = await CartModel.findOne({ _id: userID });
         let user = await UserModel.findById(userID);
@@ -278,9 +299,12 @@ async function purchasedCourseFucntion(req, res, userID, email, phone, name, add
             await InstructorModel.findByIdAndUpdate(instructorId, { $inc: { noOfStudents: 1 } });
         }
 
-        await deleteCart(userID);
-
-        return res.redirect(`${process.env.APP_SERVICE_URL}/success`);
+        await deleteCart(userID)
+        console.log("Payment Success", userID, user.name)
+        if (data['SubMerchantId'] === 10) {
+            return res.status(200).json({ success: true, data });
+        }
+        return res.redirect(`${process.env.APP_SERVICE_URL}/success`)
     } catch (error) {
         console.error(error);
         return res.redirect(`${process.env.APP_SERVICE_URL}/error`);

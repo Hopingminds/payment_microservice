@@ -1,4 +1,5 @@
 const CartModel = require("../models/Cart.model");
+const PendingPaymentsModel = require("../models/PendingPayments.model");
 const PromoModel = require("../models/Promo.model");
 const UserModel = require("../models/User.model");
 
@@ -25,7 +26,7 @@ async function deleteCart(userID) {
     }
 }
 
-async function getcartValue(userID, promoCode) {
+async function getcartValue(userID, promoCode, internshipPayment) {
 	try {
         const user = await UserModel.findById(userID);
 		const cart = await CartModel
@@ -38,15 +39,51 @@ async function getcartValue(userID, promoCode) {
 		}
 
 		// Calculate total amount for course
-        let totalAmount = cart.courses.reduce((total, course) => {
+        let totalCoursesAmount = cart.courses.reduce((total, course) => {
             const discountedPrice = course.course.base_price * (1 - (course.course.discount_percentage / 100));
             return total + discountedPrice;
         }, 0);
 
+		let totalInternshipsAmount = 0;
+
 		// Add total amount for internships
-        totalAmount += cart.internships.reduce((total, internship) => {
-            return total + internship.internship.registration_price;
-        }, 0)
+		for (const internship of cart.internships) {
+			const discountedBasePrice = internship.internship.base_price * (1 - (internship.internship.discount_percentage / 100));
+
+			if (internshipPayment === "registration_amount") {
+				const remainingAmount = discountedBasePrice - internship.internship.registration_price;
+				totalInternshipsAmount += internship.internship.registration_price;
+
+				// Check if a PendingPayment entry already exists for this user and internship
+				const existingPayment = await PendingPaymentsModel.findOne({
+					user: userID,
+					internship: internship.internship._id,
+					paymentStatus: "registration_paid"
+				});
+
+				if (!existingPayment) {
+					// Add entry to PendingPayment schema for registration payments if it doesn't exist
+					await PendingPaymentsModel.create({
+						user: userID,
+						internship: internship.internship._id,
+						totalAmount: discountedBasePrice,
+						paymentStatus: "registration_paid",
+						pendingAmount: remainingAmount,
+						payments: [
+							{
+								amount: internship.internship.registration_price,
+								isCompleted: false
+							}
+						]
+					});
+				}
+			} else {
+				const discountedPrice = internship.internship.base_price * (1 - (internship.internship.discount_percentage / 100));
+				totalInternshipsAmount += discountedPrice;
+			}
+		}
+
+		let totalAmount = totalCoursesAmount + totalInternshipsAmount;
 
         // Check if promoCode is provided
 		if (promoCode) {
@@ -58,17 +95,31 @@ async function getcartValue(userID, promoCode) {
 				const currentDate = new Date();
 				if (promo.validTill > currentDate && (promo.forCollege === user.college || !promo.forCollege)) {
 					// Apply promo discount
-					totalAmount = totalAmount * (1 - (promo.discountPercentage / 100));
+
+					if(promo.applicableTo === "courses"){
+						totalCoursesAmount = totalCoursesAmount * (1 - (promo.discountPercentage / 100));
+					}
+					else if(promo.applicableTo === "internships"){
+						totalInternshipsAmount = totalInternshipsAmount * (1 - (promo.discountPercentage / 100));
+					}
+					else{
+						totalAmount *= (1 - (promo.discountPercentage / 100));
+					}
 
                     // Decrease the promo quantity if it's not infinite
 					if (promo.quantity > 0) {
 						promo.quantity -= 1;
 						await promo.save();
 					}
+
+					// Recalculate totalAmount after applying promo
+					totalAmount = totalCoursesAmount + totalInternshipsAmount;
 				}
 			}
 		}
 
+        console.log(totalCoursesAmount)
+        console.log(totalInternshipsAmount)
         console.log(totalAmount)
 		return parseFloat(totalAmount).toFixed(2);
 	} catch (error) {
