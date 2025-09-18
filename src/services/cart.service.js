@@ -121,7 +121,7 @@ async function getcartValue(userID, promoCode, internshipPayment) {
         console.log(totalCoursesAmount)
         console.log(totalInternshipsAmount)
         console.log(totalAmount)
-		return parseFloat(totalAmount).toFixed(2);
+		return (parseFloat(totalAmount) * 1.18).toFixed(2);
 	} catch (error) {
 		console.error(error.message)
 		return false
