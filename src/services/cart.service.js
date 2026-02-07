@@ -104,6 +104,7 @@ async function getcartValue(userID, promoCode, internshipPayment) {
 					}
 					else{
 						totalAmount *= (1 - (promo.discountPercentage / 100));
+						console.log("TEST1",totalAmount)
 					}
 
                     // Decrease the promo quantity if it's not infinite
@@ -111,15 +112,15 @@ async function getcartValue(userID, promoCode, internshipPayment) {
 						promo.quantity -= 1;
 						await promo.save();
 					}
-					// Recalculate totalAmount after applying promo
-					totalAmount = totalAmount + (totalAmount * 18 / 100);
+					// Recalculate totalAmount after applying promo and adding 18% gst
+					totalAmount = totalAmount + (totalAmount * 0.18);
 				}
 			}
 		}
 
-        console.log(totalCoursesAmount)
-        console.log(totalInternshipsAmount)
-        console.log(totalAmount)
+        // console.log(totalCoursesAmount)
+        // console.log(totalInternshipsAmount)
+        console.log("TEST2",totalAmount)
 		return parseFloat(totalAmount).toFixed(2);
 	} catch (error) {
 		console.error(error.message)
