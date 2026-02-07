@@ -112,7 +112,7 @@ async function getcartValue(userID, promoCode, internshipPayment) {
 						await promo.save();
 					}
 					// Recalculate totalAmount after applying promo
-					totalAmount = 1000 + (1000 * 0.18); // 18% gst
+					totalAmount = totalAmount + (totalAmount * 18 / 100);
 				}
 			}
 		}
